@@ -29,6 +29,41 @@ $(function () {
       })
       .catch(console.error.bind(console))
 
+      $.get('/api/days')
+      .then(function(allDays){
+        console.log(allDays);
+        var newDay = dayModule.create();
+        newDay.show();
+      })
+    
+    $.ajax({
+      method: 'POST',
+      url: '/api/days',
+      data: {number: 1}
+    })
+      .then(function(day){
+        console.log(day);
+      })
+
+    $.ajax({
+      method: 'POST',
+      url: '/api/days',
+      data: {number: 2}
+    })
+      .then(function(day){
+        console.log(day);
+      })
+
+      $.ajax({
+      method: 'POST',
+      url: '/api/days',
+      data: {number: 3}
+    })
+      .then(function(day){
+        console.log(day);
+      })
+
+
 
 
 
