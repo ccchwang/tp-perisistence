@@ -8,6 +8,8 @@
 
 var utilsModule = {
 
+
+
   // copies properties from source onto target object
   merge: function (source, target) {
     if (!source) return;
