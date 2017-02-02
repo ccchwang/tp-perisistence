@@ -19,139 +19,115 @@ router.get('/', function(req, res, next) {
     })
 })
 
+/*
+Day.belongsTo(Hotel);
+Day.belongsToMany(Restaurant, {through: 'day_restaurant'});
+Day.belongsToMany(Activity, {through: 'day_activity'});
+ */
 
-router.get('/restaurants', function(req, res, next){
-  Restaurant.findAll()
-  .then((allRestaurants) => {
-    res.send(allRestaurants)
-  })
-})
-
-router.get('/activities', function(req, res, next){
-
-})
-
+//GET ALL DAYS
 router.get('/days', function(req, res, next){
-  Day.findAll({include: [Hotel, Restaurant, Activity]})
+  Day.findAll({
+    include: [Hotel, Restaurant, Activity],
+    order: [['number', 'ASC']]
+  })
     .then((allDays) => {
       res.send(allDays)
     })
 })
 
-router.delete('/days/:id', function(req, res, next){
-
-  var id = req.params.id;
-
-  Day.destroy({
-    where: {
-      number: id
-    }
-  })
-    .then(() => {
-      res.send('destroyed day!')
-    })
-})
-
-router.post('/days/:id', function(req, res, next){
-  var number = req.params.id;
-  var hotelId = req.body.hotelId;
-
-  var findingDay = Day.findOne({
-      where: {
-        number: number
-      }
-    })
-
-  var findingHotel = Hotel.findOne({
-    where: {
-      id: hotelId
-    }
-  })
-
-  Promise.all([findingDay, findingHotel])
-    .then(([foundDay, foundHotel]) => {
-      return foundDay.setHotel(foundHotel);
-    })
-    .then((day) => {
-      res.send(day)
-    })
-})
-
-router.delete('/days', function(req, res, next){
-  Day.destroy({
-    where: {}
-  })
-    .then(function(){
-      res.send('deleted all days!')
-    })
-})
-
+//CREATE A DAY
 router.post('/days', function(req, res, next){
-  var number = req.body.number
-  Day.create({
-    number: number
-  })
+  Day.create(req.body)
     .then((day) => {
-      console.log('created day', day)
       res.send(day);
     })
 })
 
+//DELETE A DAY
+router.delete('/days/:id', function(req, res, next){
+  Day.destroy({
+    where: {
+      number: req.params.id
+    }
+  })
+  .then(() => {
+    res.send('destroyed day!')
+  })
+})
 
-
+//CREATE AN ATTRACTION
 router.post('/days/:id/:type', function(req, res, next){
-  
+  var findingDay = Day.findOne({ where: { number: req.params.id } });
+  var findingAttraction;
+
   if (req.params.type === "restaurant"){
+    var findingAttraction = Restaurant.findOne({
+      where: { id: req.body.id }
+    });
 
-  var dayNumber = req.params.id;
-  var restaurantId = req.body.restaurantId;
+    Promise.all([findingDay, findingAttraction])
+      .then(([foundDay, foundRest]) => {
+        res.send(foundDay.addRestaurant(foundRest));
+      })
+  }
 
-  var findingDay = Day.findOne({
-    where: {
-      number: dayNumber
-    }
-  });
-  //console.log(findingDay);
+  else if (req.params.type === "activity"){
+    var findingAttraction = Activity.findOne({
+      where: { id: req.body.id }
+    });
 
-  var findingRestaurant = Restaurant.findOne({
-    where: {
-      id: restaurantId
-    }
-  });
-  //console.log(findingRestaurant);
+    Promise.all([findingDay, findingAttraction])
+      .then(([foundDay, foundActivity]) => {
+        res.send(foundDay.addActivity(foundActivity));
+      })
+  }
 
-  Promise.all([findingDay, findingRestaurant])
-      .then(function([foundDay, foundRestaurant]){
-         console.log(foundDay, foundRestaurant);
+  else if (req.params.type === "hotel"){
+    var findingAttraction = Hotel.findOne({
+      where: { id: req.body.id }
+    });
 
-          return foundDay.addRestaurant(foundRestaurant);
- })
-}
-else if (req.params.type === "activity"){
-  var dayNumber = req.params.id;
-  var activityId = req.body.activityId;
+    Promise.all([findingDay, findingAttraction])
+      .then(([foundDay, foundHotel]) => {
+        res.send(foundDay.setHotel(foundHotel));
+      })
+  }
+})
 
-  var findingDay = Day.findOne({
-    where: {
-      number: dayNumber
-    }
-  });
-  //console.log(findingDay);
+//DELETE AN ATTRACTION
+router.delete('/days/:id/:type', function(req, res, next){
+  var findingDay = Day.findOne({ where: { number: req.params.id } });
+  var findingAttraction;
 
-  var findingActivity = Activity.findOne({
-    where: {
-      id: activityId
-    }
-  });
-  //console.log(findingRestaurant);
+  if (req.params.type === "restaurant"){
+    var findingAttraction = Restaurant.findOne({
+      where: { id: req.body.id }
+    });
 
-  Promise.all([findingDay, findingActivity])
-      .then(function([foundDay, foundActivity]){
-         console.log(foundDay, foundActivity);
+    Promise.all([findingDay, findingAttraction])
+      .then(([foundDay, foundRest]) => {
+        res.send(foundDay.removeRestaurant(foundRest));
+      })
+  }
 
-          return foundDay.addActivity(foundActivity);
- })
-}
+  else if (req.params.type === "activity"){
+    var findingAttraction = Activity.findOne({
+      where: { id: req.body.id }
+    });
+
+    Promise.all([findingDay, findingAttraction])
+      .then(([foundDay, foundActivity]) => {
+        res.send(foundDay.removeActivity(foundActivity));
+      })
+  }
+
+  else if (req.params.type === "hotel"){
+    findingDay
+      .then((day) => {
+        res.send(day.setHotel(null));
+      })
+  }
 })
 
 
