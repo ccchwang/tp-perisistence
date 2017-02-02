@@ -8,8 +8,8 @@ var Hotel = require('./hotel');
 
 var Day = db.define('day', {
   number: {
-    type: Sequelize.INTEGER,
-    allowNull: false
+    type: Sequelize.INTEGER
+  //  allowNull: false
   }
 //}, //{
 	// hooks: {

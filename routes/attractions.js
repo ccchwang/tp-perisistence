@@ -19,8 +19,6 @@ router.get('/', function(req, res, next) {
     })
 })
 
-router.get('/hotels', function(req, res, next){
-})
 
 router.get('/restaurants', function(req, res, next){
   Restaurant.findAll()
@@ -40,8 +38,43 @@ router.get('/days', function(req, res, next){
     })
 })
 
-router.get('/days/:id', function(req, res, next){
+router.delete('/days/:id', function(req, res, next){
 
+  var id = req.params.id;
+
+  Day.destroy({
+    where: {
+      number: id
+    }
+  })
+    .then(() => {
+      res.send('destroyed day!')
+    })
+})
+
+router.put('/days/:id', function(req, res, next){
+  var number = req.params.id;
+  var hotelId = req.body.hotelId;
+
+  var findingDay = Day.findOne({
+      where: {
+        number: number
+      }
+    })
+
+  var findingHotel = Hotel.findOne({
+    where: {
+      id: hotelId
+    }
+  })
+
+  Promise.all([findingDay, findingHotel])
+    .then(([foundDay, foundHotel]) => {
+      return foundDay.setHotel(foundHotel);
+    })
+    .then((day) => {
+      res.send(day)
+    })
 })
 
 router.delete('/days', function(req, res, next){
@@ -54,10 +87,12 @@ router.delete('/days', function(req, res, next){
 })
 
 router.post('/days', function(req, res, next){
-  //console.log("req!", req.body.num);
-  Day.create(req.body)
+  var number = req.body.number
+  Day.create({
+    number: number
+  })
     .then((day) => {
-      
+      console.log('created day', day)
       res.send(day);
     })
 })
