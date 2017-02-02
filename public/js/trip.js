@@ -82,7 +82,7 @@ var tripModule = (function () {
        url: "/api/days/" + currentDay.number
     })
       .then((response) => {
-        console.log(response);
+      //  console.log(response);
 
         if (days.length < 2 || !currentDay) return;
         // remove from the collection
@@ -113,18 +113,27 @@ var tripModule = (function () {
       $.get('/api/days')    //load to show what's already existing in database
         .then((allDays) => {
           allDays.forEach((day) => {
-            var newDay = dayModule.create({number: day.number})
-            days.push(newDay);
-            if (days.length === 1) {
-              currentDay = newDay;
-            }
-            switchTo(newDay);
+          //console.log(day);
+            var newDay = dayModule.create({number: day.number, hotel: day.hotel, restaurants: day.restaurants, activities: day.activities})
+              days.push(newDay);
+                if (days.length === 1) {
+                  currentDay = newDay;
+                  switchTo(newDay);
+                }
+                
+               
+             // })
+             // hotel = attractionsModule.create('hotel', day.hotelId);
+            
+            
           })
         })
 
       //$(addDay);
 
-    },
+},
+
+    
 
     switchTo: switchTo,
 
@@ -134,15 +143,30 @@ var tripModule = (function () {
 
       if (attraction.type === "hotel" ){
         $.ajax({
-          method: "PUT",
+          method: "POST",
           url: "/api/days/" + currentDay.number,
           data: {hotelId: attraction.id}
         })
         .then((day) => {
-          console.log('saved hotelId')
+         // console.log('saved hotelId')
         })
       }
-    },
+      if (attraction.type === "restaurant"){
+        $.ajax({
+          method: "POST",
+          url: "/api/days/" + currentDay.number + "/restaurant",
+          data: {restaurantId: attraction.id}
+        })
+      }
+    if (attraction.type === "activity"){
+        $.ajax({
+          method: "POST",
+          url: "/api/days/" + currentDay.number + "/activity",
+          data: {activityId: attraction.id}
+        })
+      }
+    
+  },
 
     removeFromCurrent: function (attraction) {
       currentDay.removeAttraction(attraction);

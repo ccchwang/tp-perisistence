@@ -32,7 +32,7 @@ router.get('/activities', function(req, res, next){
 })
 
 router.get('/days', function(req, res, next){
-  Day.findAll()
+  Day.findAll({include: [Hotel, Restaurant, Activity]})
     .then((allDays) => {
       res.send(allDays)
     })
@@ -52,7 +52,7 @@ router.delete('/days/:id', function(req, res, next){
     })
 })
 
-router.put('/days/:id', function(req, res, next){
+router.post('/days/:id', function(req, res, next){
   var number = req.params.id;
   var hotelId = req.body.hotelId;
 
@@ -100,7 +100,58 @@ router.post('/days', function(req, res, next){
 
 
 router.post('/days/:id/:type', function(req, res, next){
+  
+  if (req.params.type === "restaurant"){
 
+  var dayNumber = req.params.id;
+  var restaurantId = req.body.restaurantId;
+
+  var findingDay = Day.findOne({
+    where: {
+      number: dayNumber
+    }
+  });
+  //console.log(findingDay);
+
+  var findingRestaurant = Restaurant.findOne({
+    where: {
+      id: restaurantId
+    }
+  });
+  //console.log(findingRestaurant);
+
+  Promise.all([findingDay, findingRestaurant])
+      .then(function([foundDay, foundRestaurant]){
+         console.log(foundDay, foundRestaurant);
+
+          return foundDay.addRestaurant(foundRestaurant);
+ })
+}
+else if (req.params.type === "activity"){
+  var dayNumber = req.params.id;
+  var activityId = req.body.activityId;
+
+  var findingDay = Day.findOne({
+    where: {
+      number: dayNumber
+    }
+  });
+  //console.log(findingDay);
+
+  var findingActivity = Activity.findOne({
+    where: {
+      id: activityId
+    }
+  });
+  //console.log(findingRestaurant);
+
+  Promise.all([findingDay, findingActivity])
+      .then(function([foundDay, foundActivity]){
+         console.log(foundDay, foundActivity);
+
+          return foundDay.addActivity(foundActivity);
+ })
+}
 })
 
 
