@@ -9,6 +9,7 @@
  * then tells the trip module to add the attraction.
  */
 
+//$(document).onReady()
 $(function () {
 
     // jQuery selects
@@ -29,12 +30,21 @@ $(function () {
       })
       .catch(console.error.bind(console))
 
-      $.get('/api/days')
+      
+      $.ajax({
+        method: 'DELETE',
+        url: '/api/days'
+      });
+
+      
+    $.get('/api/days')
       .then(function(allDays){
-        console.log(allDays);
-        var newDay = dayModule.create();
-        newDay.show();
-      })
+        
+        var dayMods = allDays.forEach(function(day){
+          return tripModule.load(day);
+        })
+     
+    });
     
     $.ajax({
       method: 'POST',
@@ -42,7 +52,7 @@ $(function () {
       data: {number: 1}
     })
       .then(function(day){
-        console.log(day);
+        //console.log(day);
       })
 
     $.ajax({
@@ -51,7 +61,7 @@ $(function () {
       data: {number: 2}
     })
       .then(function(day){
-        console.log(day);
+        //console.log(day);
       })
 
       $.ajax({
@@ -60,10 +70,10 @@ $(function () {
       data: {number: 3}
     })
       .then(function(day){
-        console.log(day);
+        //console.log(day);
       })
 
-
+//send an ajax request to save day that contains event, when event is added 
 
 
 

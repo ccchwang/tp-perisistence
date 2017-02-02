@@ -44,8 +44,13 @@ router.get('/days/:id', function(req, res, next){
 
 })
 
-router.delete('/days/:id', function(req, res, next){
-
+router.delete('/days', function(req, res, next){
+  Day.destroy({
+    where: {}
+  })
+    .then(function(){
+      res.send('deleted all days!')
+    })
 })
 
 router.post('/days', function(req, res, next){
